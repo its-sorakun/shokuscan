@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Scanner</title>
+    <!-- <link rel="stylesheet" href="foodscan.css"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='foodscan.css')}}">
+    <!-- <script src="https://unpkg.com/@zxing/library@latest"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="material-icons icon" id="theme-icon">dark_mode</span>
+    </button>
+    
+    <h1>Food Scanner</h1>
+    <p class="status">Ready to scan</p>
+    
+    <video id="scanner"></video>
+    
+    <button id="start-camera">
+        <span class="material-icons icon">photo_camera</span>
+        <span>Scan Barcode</span>
+    </button>
+    
+    <p id="result"></p>
+    <div id="output-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Theme toggle functionality - FIXED VERSION
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const html = document.documentElement;
+            
+            // Check for saved preference or system preference
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            // Set initial theme
+            const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            html.setAttribute('data-theme', initialTheme);
+            themeIcon.textContent = initialTheme === 'dark' ? 'light_mode' : 'dark_mode';
+            
+            // Toggle function
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                themeIcon.textContent = newTheme === 'dark' ? 'light_mode' : 'dark_mode';
+            });
+            
+            // Scanner functionality
+            const codeReader = new ZXing.BrowserMultiFormatReader();
+            let scanning = false;
+            const elements = {
+                scanner: document.getElementById('scanner'),
+                result: document.getElementById('result'),
+                output: document.getElementById('output-container'),
+                button: document.getElementById('start-camera'),
+                status: document.querySelector('.status'),
+                icon: document.querySelector('#start-camera .icon')
+            };
+
+            function stopScanner() {
+                codeReader.reset();
+                elements.scanner.style.display = 'none';
+                elements.button.innerHTML = '<span class="material-icons icon">photo_camera</span><span>Scan Barcode</span>';
+                document.body.classList.remove('scanner-active');
+                scanning = false;
+                elements.status.textContent = "Ready to scan";
+            }
+
+            function sendBarcode(barcode) {
+                document.body.classList.add('processing');
+                elements.button.innerHTML = '<span class="material-icons icon">hourglass_top</span><span>Processing...</span>';
+                elements.status.textContent = "Checking product...";
+                
+                fetch('/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ barcode: barcode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    elements.output.innerText = data.output || "No product information available";
+                    elements.output.style.display = 'block';
+                    elements.status.textContent = "Scan complete";
+                })
+                .catch(error => {
+                    elements.result.textContent = "Scan failed";
+                    elements.status.textContent = "Error: " + error.message;
+                })
+                .finally(() => {
+                    document.body.classList.remove('processing');
+                    stopScanner();
+                });
+            }
+
+            elements.button.addEventListener('click', () => {
+                if (scanning) {
+                    stopScanner();
+                    return;
+                }
+                
+                codeReader.decodeFromVideoDevice(undefined, 'scanner', (result, err) => {
+                    if (result) {
+                        elements.result.textContent = result.text;
+                        sendBarcode(result.text);
+                        codeReader.reset(); // Stop camera immediately after scan
+                    }
+                    if (err && !(err instanceof ZXing.NotFoundException)) {
+                        elements.result.textContent = "Scan error";
+                        elements.status.textContent = "Please try again";
+                    }
+                }).then(() => {
+                    elements.scanner.style.display = 'block';
+                    elements.button.innerHTML = '<span class="material-icons icon">cancel</span><span>Stop Scanning</span>';
+                    document.body.classList.add('scanner-active');
+                    elements.status.textContent = "Align barcode with camera";
+                    scanning = true;
+                }).catch(err => {
+                    elements.result.textContent = "Camera error";
+                    elements.status.textContent = "Please enable camera access";
+                });
+            });
+        });
+    </script>
+</body>
+</html>

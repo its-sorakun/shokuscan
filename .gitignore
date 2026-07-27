@@ -2,3 +2,4 @@
 ngrok.exe
 data.json
 prompt_debug.txt
+__pycache__

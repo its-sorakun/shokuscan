@@ -26,7 +26,7 @@ ShokuScan is a web application that analyzes packaged food products by scanning 
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/ShokuScan.git
+git clone https://github.com/its-sorakun/ShokuScan.git
 cd ShokuScan
 ```
 

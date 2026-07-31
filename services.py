@@ -103,7 +103,7 @@ If no relevant product details are found, simply respond with 'no information av
     # ── END DEBUG ──
 
     response = client.chat.completions.create(
-        model="sarvam-30b",
+        model="sarvam-105b",
         messages=[{"role": "user", "content": prompt}]
     )
     content = response.choices[0].message.content if response.choices else None

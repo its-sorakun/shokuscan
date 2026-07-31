@@ -102,9 +102,23 @@ If no relevant product details are found, simply respond with 'no information av
         f.write(prompt)
     # ── END DEBUG ──
 
-    response = client.chat.completions.create(
-        model="sarvam-105b",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    content = response.choices[0].message.content if response.choices else None
-    return content.strip() if content else "No analysis returned."
+    try:
+        response = client.chat.completions.create(
+            model="sarvam-105b",
+            messages=[{"role": "user", "content": prompt}],
+            timeout=120  # Explicitly allow up to 120s for the large 105b model
+        )
+        
+        # ── DEBUG RESPONSE ──
+        print("DEBUG ► Raw LLM Response:")
+        print(response)
+        if response.choices:
+            print(f"DEBUG ► Finish Reason: {response.choices[0].finish_reason}")
+        # ── END DEBUG ──
+
+        content = response.choices[0].message.content if response.choices else None
+        return content.strip() if content else f"No analysis returned. (Finish reason: {response.choices[0].finish_reason if response.choices else 'No choices'})"
+        
+    except Exception as e:
+        print(f"DEBUG ► Exception during LLM call: {e}")
+        return f"Error during analysis: {e}"

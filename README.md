@@ -4,7 +4,9 @@
 
 > ### **The FSSAI might be sleeping, but this app isn't.**
 
-Ever wondered what all those complicated ingredients on the back of your food packaging actually mean? ShokuScan takes the mystery out of packaged foods. By simply scanning a barcode with your phone, ShokuScan instantly provides you with a plain-English breakdown of what you are about to eat. **Because the FSSAI isn't helping us, I built this app to help you all get the clear nutritional insights you deserve.**
+Ever wondered what all those complicated ingredients on the back of your food packaging actually mean? ShokuScan takes the mystery out of packaged foods. By simply scanning a barcode with your phone, ShokuScan instantly provides you with a plain-English breakdown of what you are about to eat.
+
+This project was inspired by recurring concerns around India's food regulation, including delays in front-of-pack nutrition warnings, inconsistent enforcement, contamination controversies, regulatory loopholes, and limited consumer-facing nutritional guidance. Rather than replacing regulators, ShokuScan aims to complement them by giving consumers clearer, AI-powered nutritional insights at the point of purchase.
 
 Powered by **OpenFoodFacts** and India's **Sarvam AI**, ShokuScan analyzes ingredients, explains hidden health risks, and provides recommendations based on strict **World Health Organization (WHO)** guidelines.
 

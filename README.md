@@ -1,5 +1,7 @@
 # 🍱 ShokuScan
 
+**Built on India's Sarvam AI 🇮🇳**
+
 > **Your AI-powered pocket nutritionist, designed to help you eat smarter and live healthier.**
 
 Ever wondered what all those complicated ingredients on the back of your food packaging actually mean? ShokuScan takes the mystery out of packaged foods. By simply scanning a barcode with your phone, ShokuScan instantly provides you with a plain-English breakdown of what you are about to eat.

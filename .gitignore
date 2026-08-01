@@ -3,3 +3,28 @@ ngrok.exe
 data.json
 prompt_debug.txt
 __pycache__
+
+# Ignore all Python files
+*.py
+
+# Ignore Flask templates and static files
+templates/
+static/
+
+# React Native / Mobile App
+mobile/node_modules/
+mobile/android/app/build/
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/local.properties
+mobile/android/app/release/
+mobile/.metro-health-check*
+
+# Build artifacts
+*.keystore
+*.apk
+*.aab
+
+# IDE
+.idea/
+*.iml

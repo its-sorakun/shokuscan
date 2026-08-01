@@ -8,6 +8,9 @@ Ever wondered what all those complicated ingredients on the back of your food pa
 
 Powered by **OpenFoodFacts** and India's **Sarvam AI**, ShokuScan analyzes ingredients, explains hidden health risks, and provides recommendations based on strict **World Health Organization (WHO)** guidelines.
 
+> [!WARNING]
+> **Legal & Medical Disclaimer:** This app is provided for educational and informational purposes only and does not constitute medical or professional nutritional advice. The nutritional analysis is generated dynamically by AI (Sarvam AI) based on crowdsourced public data (OpenFoodFacts). AI models can make mistakes, so please do not take the results at face value. Always consult a healthcare professional for dietary advice and verify ingredients yourself. The creator of this open-source app assumes no liability for inaccuracies or decisions made based on its output.
+
 ---
 
 ## ✨ Features

@@ -2,14 +2,24 @@
 
 **Built on India's Sarvam AI 🇮🇳**
 
-> **Your AI-powered pocket nutritionist, designed to help you eat smarter and live healthier.**
+> ### **The FSSAI might be sleeping, but this app isn't.**
 
-Ever wondered what all those complicated ingredients on the back of your food packaging actually mean? ShokuScan takes the mystery out of packaged foods. By simply scanning a barcode with your phone, ShokuScan instantly provides you with a plain-English breakdown of what you are about to eat.
+Ever wondered what all those complicated ingredients on the back of your food packaging actually mean? ShokuScan takes the mystery out of packaged foods. By simply scanning a barcode with your phone, ShokuScan instantly provides you with a plain-English breakdown of what you are about to eat. **Because the FSSAI isn't helping us, I built this app to help you all get the clear nutritional insights you deserve.**
 
 Powered by **OpenFoodFacts** and India's **Sarvam AI**, ShokuScan analyzes ingredients, explains hidden health risks, and provides recommendations based on strict **World Health Organization (WHO)** guidelines.
 
 > [!WARNING]
 > **Legal & Medical Disclaimer:** This app is provided for educational and informational purposes only and does not constitute medical or professional nutritional advice. The nutritional analysis is generated dynamically by AI (Sarvam AI) based on crowdsourced public data (OpenFoodFacts). AI models can make mistakes, so please do not take the results at face value. Always consult a healthcare professional for dietary advice and verify ingredients yourself. The creator of this open-source app assumes no liability for inaccuracies or decisions made based on its output.
+
+---
+
+## 📖 The Story Behind Creation
+
+Since the FSSAI isn't doing enough to protect consumers, there is a massive lack of public awareness about what we are actually eating and which ingredients are truly harmful. 
+
+As someone who lives alone, I frequently have to rely on packaged foods. Whenever I went to the supermarket, I would constantly struggle to figure out which packaged food was actually the healthier option for me. The ingredient lists were full of complex chemical names, and the packaging was always designed to be misleading. 
+
+I realized that if I was struggling with this, millions of others were too. I built ShokuScan to take matters into our own hands. If regulatory bodies won't give us the clear, honest nutritional insights we deserve, this app will!
 
 ---
 

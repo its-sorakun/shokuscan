@@ -43,7 +43,9 @@ export default function ResultScreen({navigation, route}: Props) {
           <Text style={styles.productName}>{productName}</Text>
           <Text style={styles.productBrand}>{brand}</Text>
           <View style={styles.barcodeTag}>
-            <Text style={styles.barcodeText}>📊 {barcode}</Text>
+            <Text style={styles.barcodeText}>
+              {barcode === 'photo-scan' ? '📸 Photo Analysis' : `📊 ${barcode}`}
+            </Text>
             {fromCache && (
               <View style={styles.cacheBadge}>
                 <Text style={styles.cacheBadgeText}>⚡ Cached</Text>

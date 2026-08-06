@@ -26,7 +26,7 @@ import {
   fetchProductData,
   serializeProductInfo,
 } from '../services/OpenFoodFactsService';
-import { analyzeWithSarvam } from '../services/SarvamService';
+import { analyzeWithSarvam, analyzePhoto } from '../services/SarvamService';
 import { buildPrompt } from '../utils/promptBuilder';
 import { createBarcodeDebouncer } from '../utils/debounce';
 import { LRUCache } from '../utils/LRUCache';
@@ -51,8 +51,10 @@ export default function HomeScreen({ navigation }: Props) {
   const { apiKey } = useApiKey();
   const [isScanning, setIsScanning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [scanMode, setScanMode] = useState<'barcode' | 'photo'>('barcode');
   const [statusText, setStatusText] = useState('Ready to scan');
   const debouncerRef = useRef(createBarcodeDebouncer(3000));
+  const cameraRef = useRef<any>(null);
 
   // Reset debouncer when coming back to this screen
   useEffect(() => {
@@ -77,6 +79,7 @@ export default function HomeScreen({ navigation }: Props) {
       }
 
       setIsProcessing(true);
+      setIsScanning(false); // Turn off camera immediately
 
       // Check LRU cache first — O(1)
       const cached = resultCache.get(barcode);
@@ -148,7 +151,6 @@ export default function HomeScreen({ navigation }: Props) {
       // Store in LRU cache
       resultCache.set(barcode, cacheEntry);
 
-      setIsScanning(false);
       navigation.navigate('Result', {
         barcode,
         ...cacheEntry,
@@ -163,8 +165,44 @@ export default function HomeScreen({ navigation }: Props) {
       return;
     }
     setIsScanning(prev => !prev);
-    setStatusText(isScanning ? 'Ready to scan' : 'Align barcode with camera');
+    setStatusText(isScanning ? 'Ready' : scanMode === 'barcode' ? 'Align barcode with camera' : 'Take a photo of ingredients');
     debouncerRef.current.reset();
+  };
+
+  const handleCapturePhoto = async () => {
+    if (!cameraRef.current || isProcessing) return;
+    if (!apiKey) {
+      Alert.alert(
+        'API Key Required',
+        'Please add your Sarvam AI API key in Settings to use Photo Analysis.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    setIsProcessing(true);
+    setStatusText('Capturing photo...');
+    try {
+      const captureData = await cameraRef.current.capture();
+      setIsScanning(false); // Turn off camera immediately
+      setStatusText('Analyzing with AI... (this may take up to 60s)');
+      
+      const sarvamResult = await analyzePhoto(captureData.uri, apiKey);
+      const analysisText = sarvamResult.analysis ?? `AI Analysis Error: ${sarvamResult.error}`;
+      
+      navigation.navigate('Result', {
+        barcode: 'photo-scan',
+        productName: 'Custom Scan',
+        brand: 'From Photo',
+        analysis: analysisText,
+        fromCache: false,
+      });
+    } catch (e: any) {
+      Alert.alert('Error', e.message || 'Failed to capture or analyze photo');
+    } finally {
+      setIsProcessing(false);
+      setStatusText('Ready');
+    }
   };
 
   return (
@@ -190,17 +228,45 @@ export default function HomeScreen({ navigation }: Props) {
         </TouchableOpacity>
       )}
 
+      {/* Mode Toggle */}
+      <View style={styles.modeToggle}>
+        <TouchableOpacity
+          style={[styles.modeButton, scanMode === 'barcode' && styles.modeButtonActive]}
+          onPress={() => setScanMode('barcode')}
+          disabled={isProcessing || isScanning}>
+          <Text style={styles.modeText}>Barcode</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.modeButton, scanMode === 'photo' && styles.modeButtonActive]}
+          onPress={() => setScanMode('photo')}
+          disabled={isProcessing || isScanning}>
+          <Text style={styles.modeText}>Photo</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Camera / Scanner Area */}
       <View style={styles.scannerContainer}>
         {isScanning ? (
-          <Camera
-            scanBarcode={true}
-            onReadCode={handleBarcodeScan}
-            showFrame={true}
-            laserColor="#4CAF50"
-            frameColor="#4CAF50"
-            style={styles.camera}
-          />
+          <View style={styles.cameraWrapper}>
+            <Camera
+              ref={cameraRef}
+              scanBarcode={scanMode === 'barcode'}
+              onReadCode={scanMode === 'barcode' ? handleBarcodeScan : undefined}
+              showFrame={scanMode === 'barcode'}
+              laserColor="#4CAF50"
+              frameColor="#4CAF50"
+              shutterPhotoSound={false}
+              style={styles.camera}
+            />
+            {scanMode === 'photo' && (
+              <TouchableOpacity
+                style={styles.captureButtonOverlay}
+                onPress={handleCapturePhoto}
+                disabled={isProcessing}>
+                <View style={styles.captureInnerCircle} />
+              </TouchableOpacity>
+            )}
+          </View>
         ) : (
           <View style={styles.scannerPlaceholder}>
             <Text style={styles.placeholderIcon}>📷</Text>
@@ -237,8 +303,10 @@ export default function HomeScreen({ navigation }: Props) {
           {isProcessing
             ? '⏳ Processing...'
             : isScanning
-              ? '✕ Stop Scanning'
-              : '📸 Scan Barcode'}
+              ? '✕ Stop Camera'
+              : scanMode === 'barcode'
+                ? '📸 Scan Barcode'
+                : '📸 Open Camera'}
         </Text>
       </TouchableOpacity>
 
@@ -305,6 +373,9 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#2a2a2a',
   },
+  cameraWrapper: {
+    flex: 1,
+  },
   camera: {
     flex: 1,
   },
@@ -320,6 +391,43 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#666666',
     fontSize: 15,
+  },
+  modeToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 20,
+    marginBottom: 16,
+    padding: 4,
+  },
+  modeButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+  },
+  modeButtonActive: {
+    backgroundColor: '#4CAF50',
+  },
+  modeText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  captureButtonOverlay: {
+    position: 'absolute',
+    bottom: 16,
+    alignSelf: 'center',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureInnerCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ffffff',
   },
   status: {
     marginTop: 16,
